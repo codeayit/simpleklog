@@ -1,4 +1,4 @@
-package com.socks.library.klog;
+package com.ayit.klog.klog;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;

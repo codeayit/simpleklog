@@ -1,17 +1,14 @@
-package com.socks.library.klog;
+package com.ayit.klog.klog;
 
 import android.util.Log;
 
-import com.socks.library.KLog;
-import com.socks.library.KLogUtil;
+
+import com.ayit.klog.KLog;
+import com.ayit.klog.KLogUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 
 /**
  * Created by zhaokaiqiang on 15/11/18.

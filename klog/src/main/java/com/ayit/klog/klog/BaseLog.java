@@ -1,8 +1,9 @@
-package com.socks.library.klog;
+package com.ayit.klog.klog;
 
 import android.util.Log;
 
-import com.socks.library.KLog;
+import com.ayit.klog.KLog;
+
 
 /**
  * Created by zhaokaiqiang on 15/11/18.

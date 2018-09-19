@@ -1,1 +1,1 @@
-include ':app',':kloglibrary'
+include ':app', ':klog'

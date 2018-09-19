@@ -9,7 +9,7 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/kloglibrary" />
+            <option value="$PROJECT_DIR$/klog" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

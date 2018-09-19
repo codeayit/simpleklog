@@ -1,14 +1,20 @@
-package com.socks.library;
+package com.ayit.klog;
 
 
-import android.os.Environment;
+import android.Manifest;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.text.TextUtils;
+import android.util.Log;
 
-import com.socks.library.klog.BaseLog;
-import com.socks.library.klog.FileLog;
-import com.socks.library.klog.JsonLog;
-import com.socks.library.klog.XmlLog;
+
+import com.ayit.klog.klog.BaseLog;
+import com.ayit.klog.klog.FileLog;
+import com.ayit.klog.klog.JsonLog;
+import com.ayit.klog.klog.XmlLog;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -30,73 +36,24 @@ import java.util.Locale;
  * </ol>
  *
  * @author zhaokaiqiang
- *         github https://github.com/ZhaoKaiQiang/KLog
- *         15/11/17 扩展功能，添加对文件的支持
- *         15/11/18 扩展功能，增加对XML的支持，修复BUG
- *         15/12/8  扩展功能，添加对任意参数的支持
- *         15/12/11 扩展功能，增加对无限长字符串支持
- *         16/6/13  扩展功能，添加对自定义全局Tag的支持,修复内部类不能点击跳转的BUG
- *         16/6/15  扩展功能，添加不能关闭的KLog.debug(),用于发布版本的Log打印,优化部分代码
- *         16/6/20  扩展功能，添加堆栈跟踪功能KLog.trace()
+ * github https://github.com/ZhaoKaiQiang/KLog
+ * 15/11/17 扩展功能，添加对文件的支持
+ * 15/11/18 扩展功能，增加对XML的支持，修复BUG
+ * 15/12/8  扩展功能，添加对任意参数的支持
+ * 15/12/11 扩展功能，增加对无限长字符串支持
+ * 16/6/13  扩展功能，添加对自定义全局Tag的支持,修复内部类不能点击跳转的BUG
+ * 16/6/15  扩展功能，添加不能关闭的KLog.debug(),用于发布版本的Log打印,优化部分代码
+ * 16/6/20  扩展功能，添加堆栈跟踪功能KLog.trace()
  */
 public final class KLog {
     public static FileWriter fileWriter;
-
     private static DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
     private static DateFormat dataFormatter = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
-
-    static {
-
-        File tagFileParent = new File(Environment.getExternalStorageDirectory() + "/smokerobot");
-
-        if (tagFileParent.exists()){
-            for (File file : tagFileParent.listFiles()){
-                String fileName = file.getName();
-                if (fileName.startsWith("log_")&& fileName.endsWith(".txt")){
-                    try {
-                        Date parse = dataFormatter.parse(fileName.split("_")[1].split("\\.")[0]);
-                        if (System.currentTimeMillis()-parse.getTime()>=7*24*60*60*1000){
-                            boolean delete = file.delete();
-                            KLog.d("删除7天前的log 文件："+file.getAbsolutePath()+" : "+delete);
-                        }
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-        }
-
-        File tagFile = new File(Environment.getExternalStorageDirectory() + "/smokerobot/log_"+dataFormatter.format(new Date())+".txt");
-        if (!tagFile.getParentFile().exists()) {
-            tagFile.getParentFile().mkdirs();
-        }
-        if (!tagFile.exists()) {
-            try {
-                tagFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-
-
-        try {
-            fileWriter = new FileWriter(tagFile, true);
-            fileWriter.write("\r\n");
-            fileWriter.write("\r\n");
-            fileWriter.write("\r\n");
-            fileWriter.write("app_start:"+formatter.format(new Date())+"------------------------------------------------------------------");
-            fileWriter.write("\r\n");
-        } catch (IOException e) {
-            e.printStackTrace();
-            fileWriter = null;
-
-        }
-    }
-
+    /**
+     * 将log 写入到文件中
+     * @param msg
+     */
     public static void writeFile(String msg) {
-//        KLog.d("开始写文件");
         if (fileWriter != null) {
             try {
                 fileWriter.write(msg);
@@ -106,7 +63,6 @@ public final class KLog {
                 e.printStackTrace();
             }
         }
-//        KLog.d("结束写文件");
     }
 
     public static final String LINE_SEPARATOR = System.getProperty("line.separator");
@@ -116,6 +72,8 @@ public final class KLog {
     private static final String PARAM = "Param";
     private static final String NULL = "null";
     private static final String TAG_DEFAULT = "KLog";
+
+    private static final int LOGFILES_HOLDING_DAYS_DEFAULT = 7;
     private static final String SUFFIX = ".java";
 
     public static final int JSON_INDENT = 4;
@@ -137,14 +95,70 @@ public final class KLog {
     private static boolean mIsGlobalTagEmpty = true;
     private static boolean IS_SHOW_LOG = true;
 
-    public static void init(boolean isShowLog) {
-        IS_SHOW_LOG = isShowLog;
+    public static void init(Context context,boolean isShowLog) {
+        String path = context.getExternalCacheDir()+"/klogs/";
+        init(context,isShowLog, TAG_DEFAULT, path, LOGFILES_HOLDING_DAYS_DEFAULT);
     }
 
-    public static void init(boolean isShowLog, @Nullable String tag) {
+    public static void init(Context context,boolean isShowLog, @Nullable String tag) {
+        String path = context.getExternalCacheDir()+"/klogs/";
+        init(context,isShowLog, tag, path, LOGFILES_HOLDING_DAYS_DEFAULT);
+    }
+
+    public static void init(Context context,boolean isShowLog, @Nullable String tag, String logFilesPercent, int holdingDays) {
         IS_SHOW_LOG = isShowLog;
         mGlobalTag = tag;
         mIsGlobalTagEmpty = TextUtils.isEmpty(mGlobalTag);
+        Log.d("klog",logFilesPercent);
+
+        //判断log 文件夹路径 是否为空
+        if (!TextUtils.isEmpty(logFilesPercent)) {
+            //检查权限
+
+            //检查权限（NEED_PERMISSION）是否被授权 PackageManager.PERMISSION_GRANTED表示同意授权
+            if (Build.VERSION.SDK_INT >= 23 && ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                Log.e(tag,"Manifest.permission.WRITE_EXTERNAL_STORAGE IS PERMISSION_DENIED");
+            }else{
+                File tagFileParent = new File(logFilesPercent);
+                if (tagFileParent.exists()) {
+                    for (File file : tagFileParent.listFiles()) {
+                        String fileName = file.getName();
+                        if (fileName.startsWith("klog_") && fileName.endsWith(".log")) {
+                            try {
+                                Date parse = dataFormatter.parse(fileName.split("_")[1].split("\\.")[0]);
+                                if (System.currentTimeMillis() - parse.getTime() >= holdingDays * 24 * 60 * 60 * 1000) {
+                                    boolean delete = file.delete();
+                                }
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }
+                File tagFile = new File(logFilesPercent, "klog_" + dataFormatter.format(new Date()) + ".log");
+                if (!tagFile.getParentFile().exists()) {
+                    tagFile.getParentFile().mkdirs();
+                }
+                if (!tagFile.exists()) {
+                    try {
+                        tagFile.createNewFile();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                try {
+                    fileWriter = new FileWriter(tagFile, true);
+                    fileWriter.write("\r\n");
+                    fileWriter.write("\r\n");
+                    fileWriter.write("klog_start:" + formatter.format(new Date()) + "------------------------------------------------------------------");
+                    fileWriter.write("\r\n");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    fileWriter = null;
+                }
+            }
+        }
     }
 
     public static void v() {

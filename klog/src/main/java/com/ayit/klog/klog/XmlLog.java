@@ -1,10 +1,10 @@
-package com.socks.library.klog;
+package com.ayit.klog.klog;
 
 import android.util.Log;
 
 
-import com.socks.library.KLog;
-import com.socks.library.KLogUtil;
+import com.ayit.klog.KLog;
+import com.ayit.klog.KLogUtil;
 
 import java.io.StringReader;
 import java.io.StringWriter;
