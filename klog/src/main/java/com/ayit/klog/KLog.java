@@ -47,23 +47,39 @@ import java.util.Locale;
  */
 public final class KLog {
     public static FileWriter fileWriter;
-    private static DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
-    private static DateFormat dataFormatter = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
+    public static DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
+    public static DateFormat dataFormatter = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
     /**
      * 将log 写入到文件中
      * @param msg
      */
-    public static void writeFile(String msg) {
-        if (fileWriter != null) {
-            try {
-                fileWriter.write(msg);
-                fileWriter.write("\r\n");
-                fileWriter.flush();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+    public static void writeFile(final String msg) {
+        if (!IS_WRITE_LOG){
+            return;
         }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                synchronized (KLog.class){
+                    long currentTime = System.currentTimeMillis();
+                    newLogFile(currentTime);
+                    clearTimeOutFile(currentTime);
+                    if (fileWriter != null) {
+                        try {
+                            fileWriter.write(msg);
+                            fileWriter.write("\r\n");
+                            fileWriter.flush();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
+            }
+        }).start();
+
     }
+
 
     public static final String LINE_SEPARATOR = System.getProperty("line.separator");
     public static final String NULL_TIPS = "Log with null object";
@@ -71,7 +87,7 @@ public final class KLog {
     private static final String DEFAULT_MESSAGE = "execute";
     private static final String PARAM = "Param";
     private static final String NULL = "null";
-    private static final String TAG_DEFAULT = "KLog";
+    private static final String TAG_DEFAULT = "klog";
 
     private static final int LOGFILES_HOLDING_DAYS_DEFAULT = 7;
     private static final String SUFFIX = ".java";
@@ -94,25 +110,35 @@ public final class KLog {
     private static String mGlobalTag;
     private static boolean mIsGlobalTagEmpty = true;
     private static boolean IS_SHOW_LOG = true;
+    private static boolean IS_WRITE_LOG = false;
+
+    private static String mGlobalLogFilesPercent;
+
+    private static int mGlobalHoldingDays;
+
+    public static String currentLogDay;
 
     public static void init(Context context,boolean isShowLog) {
         String path = context.getExternalCacheDir()+"/klogs/";
-        init(context,isShowLog, TAG_DEFAULT, path, LOGFILES_HOLDING_DAYS_DEFAULT);
+        init(context,isShowLog,TAG_DEFAULT);
     }
 
     public static void init(Context context,boolean isShowLog, @Nullable String tag) {
         String path = context.getExternalCacheDir()+"/klogs/";
-        init(context,isShowLog, tag, path, LOGFILES_HOLDING_DAYS_DEFAULT);
+        init(context,isShowLog,false, tag, path, LOGFILES_HOLDING_DAYS_DEFAULT);
     }
 
-    public static void init(Context context,boolean isShowLog, @Nullable String tag, String logFilesPercent, int holdingDays) {
+    public static void init(Context context,boolean isShowLog, boolean isWriteLog,@Nullable String tag,String logFilesDir, int holdingDays) {
         IS_SHOW_LOG = isShowLog;
+        IS_WRITE_LOG = isWriteLog;
         mGlobalTag = tag;
         mIsGlobalTagEmpty = TextUtils.isEmpty(mGlobalTag);
-        Log.d("klog",logFilesPercent);
+        mGlobalLogFilesPercent = logFilesDir;
+        mGlobalHoldingDays = holdingDays;
+        Log.d(tag,logFilesDir);
 
         //判断log 文件夹路径 是否为空
-        if (!TextUtils.isEmpty(logFilesPercent)) {
+        if (!TextUtils.isEmpty(logFilesDir)&& IS_WRITE_LOG) {
             //检查权限
 
             //检查权限（NEED_PERMISSION）是否被授权 PackageManager.PERMISSION_GRANTED表示同意授权
@@ -120,42 +146,112 @@ public final class KLog {
                     != PackageManager.PERMISSION_GRANTED) {
                 Log.e(tag,"Manifest.permission.WRITE_EXTERNAL_STORAGE IS PERMISSION_DENIED");
             }else{
-                File tagFileParent = new File(logFilesPercent);
-                if (tagFileParent.exists()) {
-                    for (File file : tagFileParent.listFiles()) {
-                        String fileName = file.getName();
-                        if (fileName.startsWith("klog_") && fileName.endsWith(".log")) {
-                            try {
-                                Date parse = dataFormatter.parse(fileName.split("_")[1].split("\\.")[0]);
-                                if (System.currentTimeMillis() - parse.getTime() >= holdingDays * 24 * 60 * 60 * 1000) {
-                                    boolean delete = file.delete();
-                                }
-                            } catch (ParseException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
+//                File tagFileParent = new File(logFilesPercent);
+//                if (tagFileParent.exists()) {
+//                    for (File file : tagFileParent.listFiles()) {
+//                        String fileName = file.getName();
+//                        if (fileName.startsWith("klog_") && fileName.endsWith(".log")) {
+//                            try {
+//                                Date parse = dataFormatter.parse(fileName.split("_")[1].split("\\.")[0]);
+//                                if (System.currentTimeMillis() - parse.getTime() >= holdingDays * 24 * 60 * 60 * 1000) {
+//                                    boolean delete = file.delete();
+//                                }
+//                            } catch (ParseException e) {
+//                                e.printStackTrace();
+//                            }
+//                        }
+//                    }
+//                }
+                if (IS_WRITE_LOG){
+                    long currentTime = System.currentTimeMillis();
+                    clearTimeOutFile(currentTime);
+                    newLogFile(currentTime);
                 }
-                File tagFile = new File(logFilesPercent, "klog_" + dataFormatter.format(new Date()) + ".log");
-                if (!tagFile.getParentFile().exists()) {
-                    tagFile.getParentFile().mkdirs();
-                }
-                if (!tagFile.exists()) {
-                    try {
-                        tagFile.createNewFile();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
+
+//                File tagFile = new File(logFilesPercent, "klog_" + dataFormatter.format(new Date()) + ".log");
+//                if (!tagFile.getParentFile().exists()) {
+//                    tagFile.getParentFile().mkdirs();
+//                }
+//                if (!tagFile.exists()) {
+//                    try {
+//                        tagFile.createNewFile();
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//                try {
+//                    fileWriter = new FileWriter(tagFile, true);
+//                    fileWriter.write("\r\n");
+//                    fileWriter.write("\r\n");
+//                    fileWriter.write("klog_start:" + formatter.format(new Date()) + "------------------------------------------------------------------");
+//                    fileWriter.write("\r\n");
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                    fileWriter = null;
+//                }
+            }
+        }
+    }
+
+    private static void newLogFile(long currentTime){
+        if (fileWriter == null){
+            currentLogDay = dataFormatter.format(new Date(currentTime));
+            File tagFile = new File(mGlobalLogFilesPercent, "klog_" + currentLogDay+ ".log");
+            if (!tagFile.getParentFile().exists()) {
+                tagFile.getParentFile().mkdirs();
+            }
+            if (!tagFile.exists()) {
                 try {
-                    fileWriter = new FileWriter(tagFile, true);
-                    fileWriter.write("\r\n");
-                    fileWriter.write("\r\n");
-                    fileWriter.write("klog_start:" + formatter.format(new Date()) + "------------------------------------------------------------------");
-                    fileWriter.write("\r\n");
+                    tagFile.createNewFile();
                 } catch (IOException e) {
                     e.printStackTrace();
-                    fileWriter = null;
+                }
+            }
+            try {
+                fileWriter = new FileWriter(tagFile, true);
+                fileWriter.write("\r\n");
+                fileWriter.write("\r\n");
+                fileWriter.write("klog_start:" + formatter.format(new Date(currentTime)) + "------------------------------------------------------------------");
+                fileWriter.write("\r\n");
+            } catch (IOException e) {
+                e.printStackTrace();
+                fileWriter = null;
+            }
+        }else{
+            String logDay = dataFormatter.format(new Date(currentTime));
+            if (!currentLogDay.endsWith(logDay)){
+                if (fileWriter!=null){
+                    try{
+                        fileWriter.flush();
+                        fileWriter.close();
+                        fileWriter = null;
+                    }catch (Exception e){
+                        try{
+                            fileWriter.close();
+                        }catch (Exception E){
+                            fileWriter = null;
+                        }
+                    }
+                    newLogFile(currentTime);
+                }
+            }
+        }
+    }
+
+    private static void clearTimeOutFile(long currentTime){
+        File tagFileParent = new File(mGlobalLogFilesPercent);
+        if (tagFileParent.exists()) {
+            for (File file : tagFileParent.listFiles()) {
+                String fileName = file.getName();
+                if (fileName.startsWith("klog_") && fileName.endsWith(".log")) {
+                    try {
+                        Date parse = dataFormatter.parse(fileName.split("_")[1].split("\\.")[0]);
+                        if (currentTime - parse.getTime() >= mGlobalHoldingDays * 24 * 60 * 60 * 1000) {
+                            boolean delete = file.delete();
+                        }
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
