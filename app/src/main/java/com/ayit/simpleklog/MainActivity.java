@@ -15,6 +15,9 @@ import android.widget.Toast;
 
 import com.ayit.klog.KLog;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -38,10 +41,29 @@ public class MainActivity extends AppCompatActivity {
                 "《红楼梦》版本可分为120回“程本”和80回“脂本”两大系统。程本为程伟元排印的印刷本，脂本为脂砚斋在不同时期抄评的早期手抄本。脂本是程本的底本。\n" +
                 "《红楼梦》是一部具有世界影响力的人情小说，举世公认的中国古典小说巅峰之作，中国封建社会的百科全书，传统文化的集大成者。小说以“大旨谈情，实录其事”自勉，只按自己的事体情理，按迹循踪，摆脱旧套，新鲜别致，取得了非凡的艺术成就。“真事隐去，假语村言”的特殊笔法更是令后世读者脑洞大开，揣测之说久而遂多。二十世纪以来，学术界因《红楼梦》异常出色的艺术成就和丰富深刻的思想底蕴而产生了以《红楼梦》为研究对象的专门学问——红学。";
 
-
-        for (int i = 0; i < 8000; i++) {
-            KLog.d(formatter.format(new Date()) + "  log ---------------------------- " + "2019-10-31 -- " +i);
+        JSONObject object = new JSONObject();
+        try {
+            object.put("title",str);
+            object.put("title",str);
+            object.put("title",str);
+            object.put("title",str);
+            object.put("title",str);
+            object.put("title",str);
+            object.put("title",str);
+            object.put("title",str);
+            object.put("title",str);
+            object.put("title",str);
+            object.put("title",str);
+            object.put("title",str);
+            for (int i = 0; i < 10000; i++) {
+                object.put("index",i);
+                KLog.json(object.toString());
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
+
+
 
 //        //检查权限（NEED_PERMISSION）是否被授权 PackageManager.PERMISSION_GRANTED表示同意授权
 //        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
