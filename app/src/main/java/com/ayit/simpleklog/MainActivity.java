@@ -37,32 +37,18 @@ public class MainActivity extends AppCompatActivity {
         KLog.init(this, true, true, "zlog", Environment.getExternalStorageDirectory().getAbsolutePath() + "/simpleKlog/", 3);
 //        KLog.init(this,true,"zlog",Environment.getExternalStorageDirectory().getAbsolutePath()+"/simpleKlog2/",3);
 //        KLog.d("123");
-        String str = "《红楼梦》，中国古代章回体长篇小说，又名《石头记》等，被列为中国古典四大名著之首，一般认为是清代作家曹雪芹所著。小说以贾、史、王、薛四大家族的兴衰为背景，以富贵公子贾宝玉为视角，描绘了一批举止见识出于须眉之上的闺阁佳人的人生百态，展现了真正的人性美和悲剧美，可以说是一部从各个角度展现女性美以及中国古代社会世态百相的史诗性著作。\n" +
-                "《红楼梦》版本可分为120回“程本”和80回“脂本”两大系统。程本为程伟元排印的印刷本，脂本为脂砚斋在不同时期抄评的早期手抄本。脂本是程本的底本。\n" +
-                "《红楼梦》是一部具有世界影响力的人情小说，举世公认的中国古典小说巅峰之作，中国封建社会的百科全书，传统文化的集大成者。小说以“大旨谈情，实录其事”自勉，只按自己的事体情理，按迹循踪，摆脱旧套，新鲜别致，取得了非凡的艺术成就。“真事隐去，假语村言”的特殊笔法更是令后世读者脑洞大开，揣测之说久而遂多。二十世纪以来，学术界因《红楼梦》异常出色的艺术成就和丰富深刻的思想底蕴而产生了以《红楼梦》为研究对象的专门学问——红学。";
+        String str = "{\"method\":\"get\",\"url\":\"http:\\\\/\\\\/www.houluzhai.top:9310\\\\/coffeeVendor\\\\/device\\\\/getGoodsLibsStrategyDetailByDeviceId\",\"params\":{\"deviceSn\":\"44:18:08:09:3f:c2\",\"deviceId\":\"80\"},\"headers\":{\"sn\":\"44:18:08:09:3f:c2\"},\"response_success\":{\"message\":\"ok\",\"content\":{\"agent\":42,\"remark\":\"\",\"isDel\":0,\"updated\":\"\",\"strategyCode\":\"STR000066\",\"isWater\":1,\"priceList\":[{\"cupParam\":\"[{\\\"index\\\":0,\\\"value\\\":\\\"大杯\\\",\\\"isShow\\\":true,\\\"waterWeight\\\":\\\"20\\\",\\\"materialWeight\\\":\\\"30\\\",\\\"price\\\":\\\"3\\\"},{\\\"index\\\":1,\\\"value\\\":\\\"中杯\\\",\\\"isShow\\\":false},{\\\"index\\\":2,\\\"value\\\":\\\"小杯\\\",\\\"isShow\\\":false}]\",\"libsCupParam\":\"\",\"cupPrice\":\"\",\"updated\":\"\",\"imageUrl\":\"http:\\\\/\\\\/www.houluzhai.top\\\\/imgs\\\\/1220d907cedf4de8ad3193134592fd70卡布奇诺_coffee.jpg\",\"isHot\":\"1\",\"strategyId\":66,\"id\":270,\"boxCode\":\"1号通道\",\"hotPrice\":0,\"price\":20,\"createTime\":\"2019-12-26 11:07:07\",\"libsId\":102,\"boxId\":272,\"goodsName\":\"卡布奇诺咖啡\",\"created\":\"jakecy\",\"imagePath\":\"\"},{\"cupParam\":\"[{\\\"index\\\":0,\\\"value\\\":\\\"大杯\\\",\\\"isShow\\\":true,\\\"waterWeight\\\":\\\"20\\\",\\\"materialWeight\\\":\\\"10\\\",\\\"price\\\":\\\"10\\\"},{\\\"index\\\":1,\\\"value\\\":\\\"中杯\\\",\\\"isShow\\\":true,\\\"waterWeight\\\":\\\"30\\\",\\\"materialWeight\\\":\\\"20\\\",\\\"price\\\":\\\"5\\\"},{\\\"index\\\":2,\\\"value\\\":\\\"小杯\\\",\\\"isShow\\\":true,\\\"waterWeight\\\":\\\"35\\\",\\\"materialWeight\\\":\\\"30\\\",\\\"price\\\":\\\"0\\\"}]\",\"libsCupParam\":\"\",\"cupPrice\":\"\",\"updated\":\"\",\"imageUrl\":\"http:\\\\/\\\\/www.houluzhai.top\\\\/imgs\\\\/56be7cf503d34ce3bde58db4fa1ded65HarinaCoffee.jpg\",\"isCold\":1,\"isHot\":\"1\",\"strategyId\":66,\"id\":271,\"boxCode\":\"2号通道\",\"hotPrice\":3,\"price\":15,\"createTime\":\"2019-12-26 11:07:07\",\"libsId\":102,\"coldPrice\":0,\"boxId\":273,\"goodsName\":\"瑞幸咖啡\",\"created\":\"jakecy\",\"imagePath\":\"\"},{\"cupParam\":\"[{\\\"index\\\":0,\\\"value\\\":\\\"大杯\\\",\\\"isShow\\\":true,\\\"waterWeight\\\":\\\"20\\\",\\\"materialWeight\\\":\\\"10\\\",\\\"price\\\":\\\"10\\\"},{\\\"index\\\":1,\\\"value\\\":\\\"中杯\\\",\\\"isShow\\\":true,\\\"waterWeight\\\":\\\"30\\\",\\\"materialWeight\\\":\\\"20\\\",\\\"price\\\":\\\"5\\\"},{\\\"index\\\":2,\\\"value\\\":\\\"小杯\\\",\\\"isShow\\\":true,\\\"waterWeight\\\":\\\"35\\\",\\\"materialWeight\\\":\\\"30\\\",\\\"price\\\":\\\"0\\\"}]\",\"libsCupParam\":\"\",\"cupPrice\":\"\",\"updated\":\"\",\"imageUrl\":\"http:\\\\/\\\\/www.houluzhai.top\\\\/imgs\\\\/1e9d2b0fee4a4fdc96436cc017833890焦糖拿铁咖啡.jpg\",\"isHot\":\"1\",\"strategyId\":66,\"id\":272,\"boxCode\":\"3号通道\",\"hotPrice\":0,\"price\":13,\"createTime\":\"2019-12-26 11:07:07\",\"libsId\":102,\"boxId\":274,\"goodsName\":\"焦糖拿铁\",\"created\":\"jakecy\",\"imagePath\":\"\"}],\"companyName\":\"名捕科技有限公司(代理商)\",\"id\":66,\"libsName\":\"\",\"createTime\":\"2019-12-26 11:08:28\",\"libsId\":102,\"companyType\":1,\"strategyName\":\"元旦优惠价\",\"created\":\"jakecy\",\"companyId\":42},\"code\":200,\"success\":true}}";
 
-        JSONObject object = new JSONObject();
-        try {
-            object.put("title",str);
-            object.put("title",str);
-            object.put("title",str);
-            object.put("title",str);
-            object.put("title",str);
-            object.put("title",str);
-            object.put("title",str);
-            object.put("title",str);
-            object.put("title",str);
-            object.put("title",str);
-            object.put("title",str);
-            object.put("title",str);
-            for (int i = 0; i < 10000; i++) {
-                object.put("index",i);
-                KLog.json(object.toString());
+        KLog.setOnLogListener(new KLog.OnLogListener() {
+            @Override
+            public void onLog(String log) {
+                Log.d("lis",log);
             }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        });
 
+        for (int i = 0; i < 10; i++) {
+            KLog.json(str);
+        }
 
 
 //        //检查权限（NEED_PERMISSION）是否被授权 PackageManager.PERMISSION_GRANTED表示同意授权

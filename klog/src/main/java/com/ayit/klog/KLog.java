@@ -25,7 +25,15 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
+
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * This is a Log tool，with this you can the following
@@ -49,6 +57,7 @@ public final class KLog {
     public static FileWriter fileWriter;
     public static DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
     public static DateFormat dataFormatter = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
+    private static long lastCheckFileTime = 0;
     /**
      * 将log 写入到文件中
      * @param msg
@@ -62,21 +71,62 @@ public final class KLog {
             public void run() {
                 synchronized (KLog.class){
                     long currentTime = System.currentTimeMillis();
-                    newLogFile(currentTime);
-                    clearTimeOutFile(currentTime);
-                    if (fileWriter != null) {
-                        try {
-                            fileWriter.write(msg);
-                            fileWriter.write("\r\n");
-                            fileWriter.flush();
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                    if (currentTime-lastCheckFileTime>60*60*1000){
+                        newLogFile(currentTime);
+                        clearTimeOutFile(currentTime);
+                        lastCheckFileTime = currentTime;
+                    }else{
+                        if (fileWriter != null) {
+                            try {
+                                fileWriter.write(msg);
+                                fileWriter.write("\r\n");
+                                fileWriter.flush();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
                         }
                     }
                 }
 
             }
         }).start();
+
+//        Observable.just(1).map(
+//                new Function<Integer, Integer>() {
+//                    @Override
+//                    public Integer apply(Integer value) throws Exception {
+////                        synchronized (KLog.class){
+//                            long currentTime = System.currentTimeMillis();
+//                            if (currentTime-lastCheckFileTime>60*60*1000){
+//                                newLogFile(currentTime);
+//                                clearTimeOutFile(currentTime);
+//                                lastCheckFileTime = currentTime;
+//                            }else{
+//                                if (fileWriter != null) {
+//                                    try {
+//                                        fileWriter.write(msg);
+//                                        fileWriter.write("\r\n");
+//                                        fileWriter.flush();
+//                                    } catch (IOException e) {
+//                                        e.printStackTrace();
+//                                    }
+//                                }
+////                            }
+//                        }
+//
+//
+//                        return 1;
+//                    }
+//                })
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(new Consumer<Integer>() {
+//                    @Override
+//                    public void accept(Integer value) throws Exception {
+//
+//                    }
+//                });
+
 
     }
 
@@ -403,7 +453,6 @@ public final class KLog {
     }
 
     private static void printLog(int type, String tagStr, Object... objects) {
-
         if (!IS_SHOW_LOG) {
             return;
         }
@@ -429,7 +478,21 @@ public final class KLog {
                 XmlLog.printXml(tag, msg, headString);
                 break;
         }
+        if (onLogListener!=null){
+            for (Object o:objects){
+                onLogListener.onLog(o.toString());
+            }
 
+        }
+    }
+
+    private static OnLogListener onLogListener;
+
+    public static void setOnLogListener(OnLogListener l){
+        onLogListener = l;
+    }
+    public interface OnLogListener{
+        void onLog(String log);
     }
 
     private static void printDebug(String tagStr, Object... objects) {
